@@ -1,0 +1,65 @@
+---
+title: "Code for Practicum"
+author: "Anthony Rondinelli"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r}
+library(readxl)
+library(tidyverse)
+library(pastecs)
+
+
+# Reading the cleaned dataset in R
+data_original<- read_excel("global_power_plant_database cleaned data.xlsx")
+View(data_original)
+```
+
+
+```{r}
+#changing the reference category to nuclear
+data_original$primary_fuel <- relevel(factor(data_original$primary_fuel), ref="Nuclear")
+
+#Simple Linear regression model
+slrpower = lm(estimated_generation_gwh_2017~primary_fuel, data = data_original)
+summary(slrpower)
+```
+
+
+```{r}
+mlrpower = lm(estimated_generation_gwh_2017~primary_fuel+capacity_mw+primary_fuel*capacity_mw, data = data_original)
+summary(mlrpower)
+```
+
+
+```{r}
+res <- resid(mlrpower)
+plot(fitted(mlrpower),res, xlab = "Fitted Line Comparison",
+     ylab = "Residuals",
+     main = "Residuals Plot",
+     xlim=c(0,500), 
+     ylim=c(-500,500))
+ abline(0,0,col = "red", lwd = 2)
+ #
+```
+
+
+
+```{r}
+tran_test<-ggplot(data = mlrpower, aes(x = primary_fuel, y = estimated_generation_gwh_2017))+   geom_histogram(stat='identity')
+tran_test
+
+#graph
+graph<-ggplot(data = mlrpower, aes(x = capacity_mw, 
+    y = estimated_generation_gwh_2017))
+    +geom_point()+scale_x_log10()
+```
+
+
+
+
+
+
+
+
